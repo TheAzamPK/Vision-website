@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <button class="btn" id="quiz-start-btn">Start</button>
+
+<form class="quiz hide" id="quiz-form">
+  <div id="quiz-container">
+     <!-- for reference -->
+    <!-- <h3 class="quiz__question"><span class="quiz__number">1.</span> Question 1</h3>
+    <div class="quiz__answers">
+      <div class="quiz__answer">
+        <input type="radio" id="answer1" name="answer" data-correct="false" required />
+        <label for="answer1">Answer 1</label>
+      </div>
+
+      <div class="quiz__answer">
+        <input type="radio" id="answer2" name="answer" data-correct="true" />
+        <label for="answer2">Answer 2</label>
+      </div>
+
+      <div class="quiz__answer">
+        <input type="radio" id="answer3" name="answer" data-correct="false" />
+        <label for="answer3">Answer 3</label>
+      </div>
+
+      <div class="quiz__answer">
+        <input type="radio" id="answer4" name="answer" data-correct="false" />
+        <label for="answer4">Answer 4</label>
+      </div>
+    </div>  -->
+  </div>
+  <div class="quiz__info">
+    <p class="quiz__time" id="quiz-timer">00:00</p>
+    <div class="button-group">
+      <button class="quiz__reset btn" id="quiz-restart-btn" data-type="warning" type="button">Restart</button>
+      <button class="quiz__next btn" data-type="primary" type="submit">Next</button>
+    </div>
+  </div>
+</form>
+</body>
+<script>
+    const quizData = [
+  {
+    question: " Adobe Illustrator's 1st version was released in -",
+    answers: [
+      { id: 1, label: "1985", correct: false },
+      { id: 2, label: "1986", correct: false },
+      { id: 3, label: "1987", correct: true },
+      { id: 4, label: "1988", correct: false }
+    ]
+  },
+  {
+    question: "Adobe Illustrator CC stands for ____, a cloud-based version of Adobe Illustrator.",
+    answers: [
+      { id: 1, label: "Adobe cloud creative", correct: false },
+      { id: 2, label: "Adobe creative cloud", correct: true },
+      { id: 3, label: "Adobe cumulative cloud", correct: false },
+      { id: 3, label: "Adobe cloud cumulative", correct: false }
+    ]
+  },
+  {
+    question: " In ____, Adobe released its first subscription-based cloud service.",
+    answers: [
+      { id: 1, label: "2010", correct: false },
+      { id: 2, label: "2011", correct: true },
+      { id: 3, label: "2012", correct: false },
+      { id: 4, label: "2013", correct: false }
+    ]
+  },
+  {
+    question: "Adobe Illustrator requires which of the following minimum system requirement(s) to be installed on Windows:",
+    answers: [
+      { id: 1, label: "In order to install Illustrator, you will need a minimum of 2GB/4GB of RAM, depending on whether you are installing 32 bits or 64 bits.", correct: false },
+      { id: 2, label: "You can use either an Intel multicore processor with 32 or 65-bit support or an AMD Athlon 64 processor to run Illustrator.", correct: false },
+      { id: 3, label: "Windows 7 or later should have been installed.", correct: false },
+      { id: 4, label: "All of the above", correct: true }
+    ]
+  }
+];
+
+const quizFormElem = document.getElementById("quiz-form");
+const quizContainerElem = document.getElementById("quiz-container");
+const quizTimerElem = document.getElementById("quiz-timer");
+const quizStartBtn = document.getElementById("quiz-start-btn");
+const quizRestartBtn = document.getElementById("quiz-restart-btn");
+
+let quizTime = 0;
+let quizIndex = 0;
+let quizScore = 0;
+let intervalId = null;
+
+quizFormElem.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const quizInputsElems = document.querySelectorAll("input[name='answer']");
+  const correctAnswer = findCorrectAnswer(quizInputsElems);
+  quizIndex++;
+
+  if (quizIndex >= quizData.length) {
+    clearInterval(intervalId);
+    intervalId = null;
+    
+    quizContainerElem.innerHTML = evaluateScore(quizScore, quizData.length);
+  } else {
+    renderQuiz(quizData[quizIndex], quizIndex);
+  }
+});
+
+quizStartBtn.addEventListener("click", (e) => {
+  e.target.classList.add("hide");
+  quizFormElem.classList.remove("hide");
+  
+  setTimer();
+  
+  renderQuiz(quizData[quizIndex], quizIndex);
+});
+
+quizRestartBtn.addEventListener("click", () => {
+  quizIndex = 0;
+  quizScore = 0;
+  
+  clearInterval(intervalId);
+  intervalId = null;
+  setTimer();
+  
+  renderQuiz(quizData[quizIndex], quizIndex);
+});
+
+function renderQuiz(data, index) {
+  if (!data) return;
+
+  const output = `<h3 class="quiz__question"><span class="quiz__number">${
+    index + 1
+  }.</span> ${data.question}</h3>
+    <div class="quiz__answers">
+      ${renderQuizAnswers(data.answers)}
+    </div>`;
+
+  quizContainerElem.innerHTML = output;
+}
+
+function renderQuizAnswers(answers) {
+  let output = "";
+
+  answers.forEach((answer) => {
+    output += `<div class="quiz__answer">
+      <input type="radio" id="answer${answer.id}" name="answer" data-correct="${answer.correct}" required />
+      <label for="answer${answer.id}">${answer.label}</label>
+    </div>`;
+  });
+
+  return output;
+}
+
+function findCorrectAnswer(quizInputs) {
+  for (let i = 0, l = quizInputs.length; i < l; i++) {
+    // If answer is correct
+    if (quizInputs[i].checked && quizInputs[i].dataset.correct === "true") {
+      quizScore++;
+      return quizInputs[i];
+    }
+  }
+
+  return null;
+}
+
+function evaluateScore(correctAnswers, questions) {
+  const scoreInPercent = Math.floor((correctAnswers / questions) * 100);
+  
+  return `<h3>Congratulations!</h3>
+          <p>You got ${scoreInPercent}% correct</p>`;
+}
+
+function setTimer() {
+  const formatTime = (num, str = "0") => num.toString().padStart(2, str);
+
+  let seconds = 0;
+  let minutes = 0;
+
+  if (!intervalId) {
+    intervalId = setInterval(() => {
+      if (seconds == 60) {
+        seconds = 0;
+        minutes++;
+      }
+
+      quizTimerElem.innerHTML = `${formatTime(minutes)}:${formatTime(seconds)}`;
+      seconds++;
+    }, 1000); // 1000ms = 1s
+  }
+}
+</script>
+</html>

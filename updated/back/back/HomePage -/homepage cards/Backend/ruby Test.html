@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    :root {
+  --clr-primary: var(--blue-8);
+  
+  --clr-neutral-500: #1c232b;
+  --clr-neutral-400: #28323E;
+  --clr-neutral-300: #384656;
+  --clr-neutral-200: #51657B;
+  --clr-neutral-100: #E6EAEF;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body,
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+body {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  
+  background-color: var(--clr-neutral-500);
+  color: var(--clr-neutral-100);
+  accent-color: var(--clr-primary);
+  
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.1;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/*------------------------------------*\
+  #UTILITIES
+\*------------------------------------*/
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
+  border: 1px solid var(--clr-neutral-300);
+  border-radius: var(--radius-2);
+  padding: 0.6em 1.4em;
+  
+  background-color: transparent;
+  color: var(--clr-neutral-100);
+  
+  font-weight: var(--font-weight-6);
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  
+  cursor: pointer;
+}
+
+.btn:is(:hover, :focus-visible) {
+  background-color: var(--clr-neutral-400);
+}
+
+/*------------------------------------*\
+  #QUIZ
+\*------------------------------------*/
+.quiz {
+  display: grid;
+  gap: var(--size-4);
+  
+  width: min(100% - 1rem, 40rem);
+  margin-block: 2rem;
+  padding: var(--size-4);
+  
+  border: 1px solid var(--clr-neutral-300);
+  border-radius: var(--radius-2);
+}
+
+#quiz-container {
+  display: grid;
+  gap: 1rem;
+}
+
+.quiz__answers {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.quiz__answer {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  background-color: var(--clr-neutral-400);
+  padding-inline: 0.5em;
+  border-radius: var(--radius-2);
+  border: 1px solid var(--clr-neutral-300);
+  overflow: hidden;
+}
+
+.quiz__answer:is(:hover, :focus-within) {
+  background-color: var(--clr-neutral-300);
+}
+
+.quiz__answer > label {
+  padding: 0.5em 1em;
+}
+
+.quiz__info {
+  display: grid;
+  gap: var(--size-2);
+  align-items: center;
+  justify-items: center;
+}
+
+@media (min-width: 30em) {
+  .quiz__info {
+    justify-items: start;
+    grid-template-columns: 1fr auto;
+  }
+}
+
+.quiz__time {
+  font-family: var(--font-mono);
+}
+
+.hide {
+  display: none;
+}
+</style>
+<body>
+    <button class="btn" id="quiz-start-btn">Start</button>
+
+<form class="quiz hide" id="quiz-form">
+  <div id="quiz-container">
+     <!-- for reference -->
+    <!-- <h3 class="quiz__question"><span class="quiz__number">1.</span> Question 1</h3>
+    <div class="quiz__answers">
+      <div class="quiz__answer">
+        <input type="radio" id="answer1" name="answer" data-correct="false" required />
+        <label for="answer1">Answer 1</label>
+      </div>
+
+      <div class="quiz__answer">
+        <input type="radio" id="answer2" name="answer" data-correct="true" />
+        <label for="answer2">Answer 2</label>
+      </div>
+
+      <div class="quiz__answer">
+        <input type="radio" id="answer3" name="answer" data-correct="false" />
+        <label for="answer3">Answer 3</label>
+      </div>
+
+      <div class="quiz__answer">
+        <input type="radio" id="answer4" name="answer" data-correct="false" />
+        <label for="answer4">Answer 4</label>
+      </div>
+    </div>  -->
+  </div>
+  <div class="quiz__info">
+    <p class="quiz__time" id="quiz-timer">00:00</p>
+    <div class="button-group">
+      <button class="quiz__reset btn" id="quiz-restart-btn" data-type="warning" type="button">Restart</button>
+      <button class="quiz__next btn" data-type="primary" type="submit">Next</button>
+    </div>
+  </div>
+</form>
+</body>
+<script>
+    const quizData = [
+  {
+    question: "Which of the following option leads to the portability and security of Java?",
+    answers: [
+      { id: 1, label: "The applet makes the Java code secure and portable", correct: false },
+      { id: 2, label: "Use of exception handling", correct: false },
+      { id: 3, label: "Bytecode is executed by JVM", correct: true },
+      { id: 4, label: "Dynamic binding between objects", correct: false }
+    ]
+  },
+  {
+    question: "Which of the following is not a Java features?",
+    answers: [
+      { id: 1, label: "Dynamic", correct: false },
+      { id: 2, label: "Use of pointers", correct: true },
+      { id: 3, label: "Architecture Neutral", correct: false },
+      { id: 3, label: "Object-oriented", correct: false }
+    ]
+  },
+  {
+    question: "Which event occurs when the user clicks on an HTML element?",
+    answers: [
+      { id: 1, label: "onmouseover", correct: false },
+      { id: 2, label: "onclick", correct: true },
+      { id: 3, label: "onchange", correct: false },
+      { id: 4, label: "onmouseclick", correct: false }
+    ]
+  },
+  {
+    question: "What does SCSS stand for?",
+    answers: [
+      { id: 1, label: "Sassy CSS", correct: true },
+      { id: 2, label: "Super-powered CSS", correct: false },
+      { id: 3, label: "Sass CSS", correct: false },
+      { id: 4, label: "Syntactic CSS", correct: false }
+    ]
+  }
+];
+
+const quizFormElem = document.getElementById("quiz-form");
+const quizContainerElem = document.getElementById("quiz-container");
+const quizTimerElem = document.getElementById("quiz-timer");
+const quizStartBtn = document.getElementById("quiz-start-btn");
+const quizRestartBtn = document.getElementById("quiz-restart-btn");
+
+let quizTime = 0;
+let quizIndex = 0;
+let quizScore = 0;
+let intervalId = null;
+
+quizFormElem.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const quizInputsElems = document.querySelectorAll("input[name='answer']");
+  const correctAnswer = findCorrectAnswer(quizInputsElems);
+  quizIndex++;
+
+  if (quizIndex >= quizData.length) {
+    clearInterval(intervalId);
+    intervalId = null;
+    
+    quizContainerElem.innerHTML = evaluateScore(quizScore, quizData.length);
+  } else {
+    renderQuiz(quizData[quizIndex], quizIndex);
+  }
+});
+
+quizStartBtn.addEventListener("click", (e) => {
+  e.target.classList.add("hide");
+  quizFormElem.classList.remove("hide");
+  
+  setTimer();
+  
+  renderQuiz(quizData[quizIndex], quizIndex);
+});
+
+quizRestartBtn.addEventListener("click", () => {
+  quizIndex = 0;
+  quizScore = 0;
+  
+  clearInterval(intervalId);
+  intervalId = null;
+  setTimer();
+  
+  renderQuiz(quizData[quizIndex], quizIndex);
+});
+
+function renderQuiz(data, index) {
+  if (!data) return;
+
+  const output = `<h3 class="quiz__question"><span class="quiz__number">${
+    index + 1
+  }.</span> ${data.question}</h3>
+    <div class="quiz__answers">
+      ${renderQuizAnswers(data.answers)}
+    </div>`;
+
+  quizContainerElem.innerHTML = output;
+}
+
+function renderQuizAnswers(answers) {
+  let output = "";
+
+  answers.forEach((answer) => {
+    output += `<div class="quiz__answer">
+      <input type="radio" id="answer${answer.id}" name="answer" data-correct="${answer.correct}" required />
+      <label for="answer${answer.id}">${answer.label}</label>
+    </div>`;
+  });
+
+  return output;
+}
+
+function findCorrectAnswer(quizInputs) {
+  for (let i = 0, l = quizInputs.length; i < l; i++) {
+    // If answer is correct
+    if (quizInputs[i].checked && quizInputs[i].dataset.correct === "true") {
+      quizScore++;
+      return quizInputs[i];
+    }
+  }
+
+  return null;
+}
+
+function evaluateScore(correctAnswers, questions) {
+  const scoreInPercent = Math.floor((correctAnswers / questions) * 100);
+  
+  return `<h3>Congratulations!</h3>
+          <p>You got ${scoreInPercent}% correct</p>`;
+}
+
+function setTimer() {
+  const formatTime = (num, str = "0") => num.toString().padStart(2, str);
+
+  let seconds = 0;
+  let minutes = 0;
+
+  if (!intervalId) {
+    intervalId = setInterval(() => {
+      if (seconds == 60) {
+        seconds = 0;
+        minutes++;
+      }
+
+      quizTimerElem.innerHTML = `${formatTime(minutes)}:${formatTime(seconds)}`;
+      seconds++;
+    }, 1000); // 1000ms = 1s
+  }
+}
+</script>
+</html>
